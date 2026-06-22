@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareerBoost – Resume & Job Readiness Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;
+  --bg2:#161922;
+  --bg3:#1e2230;
+  --card:#242838;
+  --border:rgba(255,255,255,0.08);
+  --border2:rgba(255,255,255,0.14);
+  --text:#e8eaf2;
+  --muted:#8b90a8;
+  --accent:#5b9cf6;
+  --accent2:#7ecfb3;
+  --accent3:#f4a26b;
+  --danger:#f46b6b;
+  --serif:'DM Serif Display',serif;
+  --sans:'DM Sans',sans-serif;
+  --radius:16px;
+  --radius-sm:10px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* GRAIN OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
+
+/* GLOW BLOBS */
+.blob{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;opacity:0.18}
+.blob1{width:600px;height:600px;background:radial-gradient(#5b9cf6,transparent 70%);top:-200px;left:-100px}
+.blob2{width:500px;height:500px;background:radial-gradient(#7ecfb3,transparent 70%);bottom:-100px;right:-150px}
+.blob3{width:400px;height:400px;background:radial-gradient(#f4a26b,transparent 70%);top:40%;left:50%;transform:translateX(-50%)}
+
+/* LAYOUT */
+.container{max-width:1100px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* NAV */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,15,20,0.85);backdrop-filter:blur(20px);
+}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;width:100%;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--serif);font-size:24px;letter-spacing:-0.5px;color:var(--text)}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:50px;font-family:var(--sans);font-weight:500;font-size:14px;cursor:pointer;border:none;transition:all .2s;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#4a8ce8;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+/* HERO */
+.hero{padding:100px 0 80px;text-align:center}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:50px;
+  background:rgba(91,156,246,0.12);border:1px solid rgba(91,156,246,0.25);
+  font-size:13px;color:var(--accent);margin-bottom:28px;
+}
+.hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+h1{font-family:var(--serif);font-size:clamp(40px,6vw,72px);line-height:1.1;letter-spacing:-1.5px;margin-bottom:24px}
+h1 em{color:var(--accent);font-style:italic}
+.hero-sub{font-size:18px;color:var(--muted);max-width:560px;margin:0 auto 48px;font-weight:300}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-lg{padding:14px 32px;font-size:16px}
+
+/* SCORE PREVIEW */
+.score-preview{
+  margin:60px auto 0;max-width:760px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:32px;display:grid;grid-template-columns:1fr 2fr;gap:32px;align-items:center;
+  animation:floatUp .6s ease both .3s;
+}
+@keyframes floatUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.score-ring{position:relative;width:140px;height:140px;margin:0 auto}
+.score-ring svg{width:100%;height:100%}
+.score-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num{font-family:var(--serif);font-size:38px;line-height:1;color:var(--text)}
+.score-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+.score-breakdown{display:flex;flex-direction:column;gap:14px}
+.score-item{display:flex;align-items:center;gap:12px}
+.score-item-label{font-size:13px;color:var(--muted);width:120px;flex-shrink:0}
+.score-bar-track{flex:1;height:6px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.score-item-val{font-size:13px;font-weight:600;color:var(--text);width:36px;text-align:right}
+
+/* UPLOAD ZONE */
+.section{padding:80px 0}
+.section-label{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:12px}
+.section-title{font-family:var(--serif);font-size:clamp(28px,4vw,42px);letter-spacing:-0.5px;margin-bottom:16px}
+.section-sub{color:var(--muted);font-size:16px;max-width:480px}
+
+.upload-card{
+  margin-top:40px;
+  background:var(--card);border:2px dashed var(--border2);border-radius:var(--radius);
+  padding:60px;text-align:center;cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.upload-card:hover,.upload-card.drag{border-color:var(--accent);background:rgba(91,156,246,0.05)}
+.upload-card.drag{transform:scale(1.01)}
+.upload-icon{width:64px;height:64px;background:rgba(91,156,246,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.upload-icon svg{width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.upload-title{font-family:var(--serif);font-size:22px;margin-bottom:8px}
+.upload-sub{color:var(--muted);font-size:14px}
+.upload-sub span{color:var(--accent);cursor:pointer}
+#file-input{display:none}
+.file-types{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:50px;background:rgba(255,255,255,0.06);font-size:12px;color:var(--muted)}
+
+/* SELECTED FILE */
+.selected-file{display:none;align-items:center;gap:16px;padding:20px 24px;background:rgba(91,156,246,0.1);border:1px solid rgba(91,156,246,0.25);border-radius:var(--radius-sm);margin-top:16px}
+.file-icon{width:40px;height:40px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:1.5}
+.file-name{font-weight:500;font-size:15px}
+.file-size{font-size:13px;color:var(--muted)}
+.remove-file{margin-left:auto;cursor:pointer;color:var(--muted);background:none;border:none;padding:4px}
+.remove-file:hover{color:var(--danger)}
+
+/* ANALYZE BTN */
+.analyze-btn{
+  width:100%;margin-top:24px;padding:18px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--accent),#7ecfb3);
+  border:none;color:#fff;font-family:var(--sans);font-size:16px;font-weight:600;
+  cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;
+  opacity:0.5;pointer-events:none;
+}
+.analyze-btn.ready{opacity:1;pointer-events:all}
+.analyze-btn.ready:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(91,156,246,0.35)}
+.analyze-btn.loading{opacity:0.8;pointer-events:none}
+
+/* SPINNER */
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:none;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* FEATURES */
+.features{padding:80px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;margin-top:48px}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:border-color .2s,transform .2s}
+.feature-card:hover{border-color:var(--border2);transform:translateY(-4px)}
+.feature-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.feature-icon svg{width:22px;height:22px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.feature-title{font-weight:600;font-size:15px;margin-bottom:8px}
+.feature-desc{font-size:14px;color:var(--muted);line-height:1.6}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin-top:56px;position:relative}
+.steps::before{content:'';position:absolute;top:32px;left:10%;right:10%;height:1px;background:var(--border2);z-index:0}
+.step{text-align:center;padding:0 24px;position:relative;z-index:1}
+.step-num{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  font-family:var(--serif);font-size:24px;color:var(--accent);
+}
+.step-title{font-weight:600;font-size:15px;margin-bottom:8px}
+.step-desc{font-size:14px;color:var(--muted)}
+
+/* RESULT PANEL */
+.result-panel{
+  display:none;margin-top:32px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+}
+.result-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.result-header h3{font-family:var(--serif);font-size:22px}
+.result-body{padding:28px}
+
+.result-score-row{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:28px}
+.big-score{
+  width:100px;height:100px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:conic-gradient(var(--accent) 0deg, var(--accent) var(--deg,0deg), rgba(255,255,255,0.07) var(--deg,0deg));
+  font-family:var(--serif);font-size:32px;position:relative;
+}
+.big-score::before{
+  content:'';position:absolute;inset:6px;border-radius:50%;background:var(--card);
+}
+.big-score span{position:relative;z-index:1}
+.big-score small{font-size:12px;font-family:var(--sans);color:var(--muted);position:relative;z-index:1}
+
+.section-scores{display:flex;flex-direction:column;gap:12px}
+.sec-row{display:flex;align-items:center;gap:12px}
+.sec-name{font-size:13px;color:var(--muted);width:110px;flex-shrink:0}
+.sec-track{flex:1;height:8px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden}
+.sec-fill{height:100%;border-radius:4px;transition:width 1s .3s cubic-bezier(.4,0,.2,1)}
+.sec-badge{font-size:12px;font-weight:600;padding:2px 8px;border-radius:4px}
+.badge-impressive{background:rgba(126,207,179,0.15);color:var(--accent2)}
+.badge-developing{background:rgba(244,162,107,0.15);color:var(--accent3)}
+.badge-needs_attention{background:rgba(244,107,107,0.15);color:var(--danger)}
+
+.suggestions{margin-top:24px}
+.suggestions h4{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px}
+.suggestion-item{
+  display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  margin-bottom:10px;font-size:14px;line-height:1.5;
+}
+.sug-icon{width:20px;height:20px;flex-shrink:0;margin-top:2px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px}
+
+/* INTERVIEW PREP */
+.interview-section{padding:80px 0;background:var(--bg2);border-top:1px solid var(--border)}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:36px}
+.topic-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:20px;cursor:pointer;transition:all .2s;
+}
+.topic-card:hover{border-color:var(--border2);background:rgba(255,255,255,0.03)}
+.topic-tag{font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.topic-title{font-weight:600;font-size:15px;margin-bottom:6px}
+.topic-count{font-size:13px;color:var(--muted)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
+.footer-logo{font-family:var(--serif);font-size:20px;margin-bottom:8px}
+.footer-sub{font-size:13px;color:var(--muted)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--card);border:1px solid var(--border2);border-radius:var(--radius-sm);
+  padding:14px 20px;font-size:14px;max-width:320px;
+  transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.success{border-color:var(--accent2);color:var(--accent2)}
+
+/* Responsive */
+@media(max-width:680px){
+  .score-preview{grid-template-columns:1fr}
+  .steps::before{display:none}
+  .result-score-row{grid-template-columns:1fr}
+  .upload-card{padding:36px 20px}
+}
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">Career<span>Boost</span></div>
+    <ul class="nav-links">
+      <li><a href="#upload">Analyze</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#interview">Interview Prep</a></li>
+    </ul>
+    <a href="#upload" class="btn btn-primary">Upload Resume</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">AI-Powered Resume Analysis</div>
+    <h1>Get placement-ready<br>with <em>smart</em> feedback</h1>
+    <p class="hero-sub">Upload your resume and receive a detailed score, section-by-section analysis, and improvement tips — powered by Groq AI (Llama 3.3).</p>
+    <div class="hero-actions">
+      <a href="#upload" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Analyze My Resume
+      </a>
+      <a href="#how" class="btn btn-outline btn-lg">See How It Works</a>
+    </div>
+
+    <!-- Animated score preview -->
+    <div class="score-preview">
+      <div>
+        <div class="score-ring">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+            <circle id="heroRing" cx="60" cy="60" r="52" fill="none" stroke="url(#grad)" stroke-width="8"
+              stroke-dasharray="326.7" stroke-dashoffset="326.7" stroke-linecap="round"
+              transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+            <defs>
+              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#5b9cf6"/>
+                <stop offset="100%" stop-color="#7ecfb3"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-ring-text">
+            <span class="score-num" id="heroScore">0</span>
+            <span class="score-label">/ 100</span>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">Overall Score</p>
+      </div>
+      <div class="score-breakdown" id="heroBreakdown">
+        <div class="score-item">
+          <span class="score-item-label">Education</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:#5b9cf6" data-w="90"></div></div>
+          <span class="score-item-val">90</span>
+        </div>
+        <div class="score-item">
+          <span class="score-item-label">Skills</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:#7ecfb3" data-w="78"></div></div>
+          <span class="score-item-val">78</span>
+        </div>
+        <div class="score-item">
+          <span class="score-item-label">Projects</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:#f4a26b" data-w="65"></div></div>
+          <span class="score-item-val">65</span>
+        </div>
+        <div class="score-item">
+          <span class="score-item-label">Experience</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:#5b9cf6" data-w="50"></div></div>
+          <span class="score-item-val">50</span>
+        </div>
+        <div class="score-item">
+          <span class="score-item-label">Certifications</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:0%;background:#b09cf6" data-w="72"></div></div>
+          <span class="score-item-val">72</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- UPLOAD SECTION -->
+<section class="section" id="upload">
+  <div class="container">
+    <div class="section-label">Step 1</div>
+    <h2 class="section-title">Upload your resume</h2>
+    <p class="section-sub">Supports PDF and DOCX files up to 5MB. Your data stays private.</p>
+
+    <div class="upload-card" id="dropZone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <p class="upload-title">Drop your resume here</p>
+      <p class="upload-sub">or <span>browse files</span></p>
+      <div class="file-types">
+        <span class="chip">PDF</span>
+        <span class="chip">DOCX</span>
+        <span class="chip">Max 5MB</span>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,.docx"/>
+    </div>
+
+    <div class="selected-file" id="selectedFile">
+      <div class="file-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div>
+        <div class="file-name" id="fileName"></div>
+        <div class="file-size" id="fileSize"></div>
+      </div>
+      <button class="remove-file" id="removeFile" title="Remove">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeResume()">
+      <span id="btnText">Analyze Resume</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+    <!-- RESULT PANEL -->
+    <div class="result-panel" id="resultPanel">
+      <div class="result-header">
+        <h3>Analysis Report</h3>
+        <button class="btn btn-outline" onclick="resetUpload()" style="font-size:13px;padding:8px 16px">Analyze Another</button>
+      </div>
+      <div class="result-body">
+        <div class="result-score-row">
+          <div class="big-score" id="bigScore" style="--deg:0deg">
+            <span id="bigScoreNum">0</span>
+            <small>/ 100</small>
+          </div>
+          <div class="section-scores" id="sectionScores"></div>
+        </div>
+        <div class="suggestions">
+          <h4>Suggestions for Improvement</h4>
+          <div id="suggestionsList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-label">What We Check</div>
+    <h2 class="section-title">Every aspect of your resume</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(91,156,246,0.12)">
+          <svg stroke="var(--accent)" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <div class="feature-title">Education</div>
+        <div class="feature-desc">Checks degree, institution, CGPA, graduation year and formatting quality.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(126,207,179,0.12)">
+          <svg stroke="var(--accent2)" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div class="feature-title">Technical Skills</div>
+        <div class="feature-desc">Identifies listed technologies and compares against placement-relevant keywords.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(244,162,107,0.12)">
+          <svg stroke="var(--accent3)" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="feature-title">Projects</div>
+        <div class="feature-desc">Evaluates descriptions, impact statements, tech stack mentions, and GitHub links.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(176,156,246,0.12)">
+          <svg stroke="#b09cf6" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="feature-title">Experience</div>
+        <div class="feature-desc">Scans for internships, roles, responsibilities, and quantifiable achievements.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(244,107,107,0.12)">
+          <svg stroke="var(--danger)" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        </div>
+        <div class="feature-title">Certifications</div>
+        <div class="feature-desc">Validates certification names, issuers, and relevance to your target domain.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(91,156,246,0.1)">
+          <svg stroke="var(--accent)" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="feature-title">AI Feedback</div>
+        <div class="feature-desc">Get personalised, actionable suggestions powered by Groq Llama 3.3 — not generic tips.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:0">
+      <div class="section-label" style="justify-content:center;display:flex">Process</div>
+      <h2 class="section-title" style="text-align:center">How CareerBoost works</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Upload Resume</div>
+        <div class="step-desc">Drop your PDF or DOCX file. We extract all text securely.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">AI Analysis</div>
+        <div class="step-desc">Groq Llama 3.3 reads every section and scores it against placement standards.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Get Your Score</div>
+        <div class="step-desc">Receive a detailed report with section scores and an overall rating.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Improve & Reupload</div>
+        <div class="step-desc">Act on the suggestions and track how your score improves.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERVIEW PREP -->
+<section class="interview-section" id="interview">
+  <div class="container">
+    <div class="section-label">Interview Prep</div>
+    <h2 class="section-title">Prepare for your interviews</h2>
+    <p class="section-sub">Topic-wise interview preparation guides to help you ace placements.</p>
+    <div class="topic-grid">
+      <div class="topic-card" onclick="openTopic('dsa')">
+        <div class="topic-tag" style="color:#5b9cf6">Core CS</div>
+        <div class="topic-title">Data Structures & Algorithms</div>
+        <div class="topic-count">150+ questions · All levels</div>
+      </div>
+      <div class="topic-card" onclick="openTopic('dbms')">
+        <div class="topic-tag" style="color:#7ecfb3">Database</div>
+        <div class="topic-title">DBMS & SQL</div>
+        <div class="topic-count">80+ questions · Practical focus</div>
+      </div>
+      <div class="topic-card" onclick="openTopic('os')">
+        <div class="topic-tag" style="color:#f4a26b">Systems</div>
+        <div class="topic-title">Operating Systems</div>
+        <div class="topic-count">60+ questions · Concept deep-dives</div>
+      </div>
+      <div class="topic-card" onclick="openTopic('oops')">
+        <div class="topic-tag" style="color:#b09cf6">Programming</div>
+        <div class="topic-title">OOP Concepts</div>
+        <div class="topic-count">50+ questions · With examples</div>
+      </div>
+      <div class="topic-card" onclick="openTopic('hr')">
+        <div class="topic-tag" style="color:#f46b6b">Soft Skills</div>
+        <div class="topic-title">HR & Behavioral Questions</div>
+        <div class="topic-count">40+ questions · Answer templates</div>
+      </div>
+      <div class="topic-card" onclick="openTopic('resume')">
+        <div class="topic-tag" style="color:#5b9cf6">Resume</div>
+        <div class="topic-title">Resume-Based Questions</div>
+        <div class="topic-count">Custom · Based on your resume</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">Career<span style="color:var(--accent)">Boost</span></div>
+    <p class="footer-sub">A placement readiness platform · Built with Flask, Groq AI & PyMuPDF</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Hero score animation ──────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const target = 73;
+    const ring = document.getElementById('heroRing');
+    const scoreEl = document.getElementById('heroScore');
+    const circumference = 326.7;
+    let current = 0;
+    const interval = setInterval(() => {
+      current++;
+      scoreEl.textContent = current;
+      ring.style.strokeDashoffset = circumference - (circumference * current / 100);
+      if (current >= target) clearInterval(interval);
+    }, 16);
+
+    document.querySelectorAll('.score-bar-fill').forEach(bar => {
+      const w = bar.dataset.w;
+      setTimeout(() => bar.style.width = w + '%', 200);
+    });
+  }, 400);
+});
+
+// ── Drag & drop ────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+let currentFile = null;
+
+function handleFile(file) {
+  const allowed = ['application/pdf','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(file.type) && !['pdf','docx'].includes(ext)) {
+    showToast('Please upload a PDF or DOCX file', 'error'); return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('File too large. Max 5MB', 'error'); return;
+  }
+  currentFile = file;
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatSize(file.size);
+  document.getElementById('selectedFile').style.display = 'flex';
+  dropZone.style.opacity = '0.5';
+  const btn = document.getElementById('analyzeBtn');
+  btn.classList.add('ready');
+}
+
+document.getElementById('removeFile').addEventListener('click', e => {
+  e.stopPropagation();
+  resetUpload();
+});
+
+function resetUpload() {
+  currentFile = null;
+  fileInput.value = '';
+  document.getElementById('selectedFile').style.display = 'none';
+  document.getElementById('resultPanel').style.display = 'none';
+  dropZone.style.opacity = '1';
+  const btn = document.getElementById('analyzeBtn');
+  btn.classList.remove('ready');
+  document.getElementById('btnText').textContent = 'Analyze Resume';
+  document.getElementById('spinner').style.display = 'none';
+  btn.classList.remove('loading');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ── Analyze (calls Flask backend) ─────────────────────────────
+async function analyzeResume() {
+  if (!currentFile) return;
+  const btn = document.getElementById('analyzeBtn');
+  btn.classList.add('loading');
+  document.getElementById('btnText').textContent = 'Analyzing...';
+  document.getElementById('spinner').style.display = 'block';
+
+  const formData = new FormData();
+  formData.append('resume', currentFile);
+
+  try {
+    const res = await fetch('/api/analyze', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.error) {
+        showToast(data.error, 'error');
+        return;
+    }
+    showResult(data);
+} catch (err) {
+    showToast('Something went wrong. Please try again.', 'error');
+}
+
+  btn.classList.remove('loading');
+  document.getElementById('btnText').textContent = 'Analyze Resume';
+  document.getElementById('spinner').style.display = 'none';
+}
+
+function getDemoResult() {
+  return {
+    overall: 74,
+    sections: [
+      { name: 'Education',      score: 88, status: 'good' },
+      { name: 'Skills',         score: 76, status: 'good' },
+      { name: 'Projects',       score: 68, status: 'ok'   },
+      { name: 'Experience',     score: 52, status: 'ok'   },
+      { name: 'Certifications', score: 40, status: 'low'  },
+    ],
+    suggestions: [
+      { type: 'ok',   text: 'Add quantifiable achievements to your experience section (e.g., "Reduced load time by 40%").' },
+      { type: 'low',  text: 'Include at least 2 relevant certifications such as AWS, Google, or NPTEL courses.' },
+      { type: 'ok',   text: 'Project descriptions lack links — add GitHub URLs for each project.' },
+      { type: 'good', text: 'Education section is well structured. Consider adding your CGPA if above 7.5.' },
+      { type: 'low',  text: 'Skills section is missing soft skills and tools like Git, Docker, or Linux.' },
+    ]
+  };
+}
+
+function showResult(data) {
+  const panel = document.getElementById('resultPanel');
+  panel.style.display = 'block';
+
+  // Big score with conic gradient
+  const bigScore = document.getElementById('bigScore');
+  const bigScoreNum = document.getElementById('bigScoreNum');
+  let n = 0;
+  const si = setInterval(() => {
+    n++;
+    bigScoreNum.textContent = n;
+    bigScore.style.setProperty('--deg', (n / 100 * 360) + 'deg');
+    if (n >= data.overall) clearInterval(si);
+  }, 16);
+
+  // Section scores
+  const sectionEl = document.getElementById('sectionScores');
+  sectionEl.innerHTML = '';
+  const colors = { impressive: '#7ecfb3', developing: '#f4a26b', needs_attention: '#f46b6b' };
+const badgeClass = { impressive: 'badge-impressive', developing: 'badge-developing', needs_attention: 'badge-needs_attention' };
+  data.sections.forEach(sec => {
+    sectionEl.innerHTML += `
+      <div class="sec-row">
+        <span class="sec-name">${sec.name}</span>
+        <div class="sec-track">
+          <div class="sec-fill" style="width:0%;background:${colors[sec.status]}" data-w="${sec.score}"></div>
+        </div>
+        <span class="sec-badge ${badgeClass[sec.status]}">${sec.score}</span>
+      </div>`;
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.sec-fill').forEach(f => f.style.width = f.dataset.w + '%');
+  }, 100);
+
+  // Suggestions
+  const sug = document.getElementById('suggestionsList');
+  sug.innerHTML = '';
+  const sugIcons = { impressive: { bg: 'rgba(126,207,179,0.15)', c: '#7ecfb3', t: '✓' }, developing: { bg: 'rgba(244,162,107,0.15)', c: '#f4a26b', t: '→' }, needs_attention: { bg: 'rgba(244,107,107,0.15)', c: '#f46b6b', t: '!' } };
+  data.suggestions.forEach(s => {
+    const i = sugIcons[s.type];
+    sug.innerHTML += `
+      <div class="suggestion-item">
+        <div class="sug-icon" style="background:${i.bg};color:${i.c}">${i.t}</div>
+        <span>${s.text}</span>
+      </div>`;
+  });
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Interview topic placeholder ────────────────────────────────
+function openTopic(topic) {
+  const names = { dsa:'Data Structures & Algorithms', dbms:'DBMS & SQL', os:'Operating Systems', oops:'OOP Concepts', hr:'HR Questions', resume:'Resume-Based Questions' };
+  showToast('Opening ' + names[topic] + ' — connect backend to load questions', 'success');
+}
+</script>
+</body>
+</html>
