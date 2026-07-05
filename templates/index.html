@@ -264,7 +264,14 @@ footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
       <li><a href="#upload">Analyze</a></li>
       <li><a href="#features">Features</a></li>
       <li><a href="#how">How it works</a></li>
-      <li><a href="#interview">Interview Prep</a></li>
+      <li><a href="/interview">Interview Prep</a></li>
+      <li><a href="/history">My Scores</a></li>
+      {% if session.user_name %}
+      <li><a href="/dashboard">{{ session.user_name }}</a></li>
+      <li><a href="/logout">Logout</a></li>
+      {% else %}
+      <li><a href="/login">Login</a></li>
+      {% endif %}
     </ul>
     <a href="#upload" class="btn btn-primary">Upload Resume</a>
   </div>
@@ -392,8 +399,29 @@ footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
           <div class="section-scores" id="sectionScores"></div>
         </div>
         <div class="suggestions">
-          <h4>Suggestions for Improvement</h4>
-          <div id="suggestionsList"></div>
+  <h4>Suggestions for Improvement</h4>
+  <div id="suggestionsList"></div>
+</div>
+
+<div class="suggestions" id="atsSection" style="display:none;margin-top:20px">
+  <h4>🤖 ATS Compatibility Tips</h4>
+  <div id="atsList"></div>
+</div>
+
+        <div class="suggestions" id="jobsSection" style="display:none;margin-top:20px">
+          <h4>Recommended Job Roles For You</h4>
+          <div id="jobsList"></div>
+        </div>
+
+        <div class="suggestions" id="questionsSection" style="display:none;margin-top:20px">
+          <h4>🎯 Your Personalized Interview Questions</h4>
+          <div id="questionsList"></div>
+        </div>
+
+        <div style="margin-top:24px;text-align:center">
+          <a href="/download-report" id="downloadBtn" style="display:none" class="btn btn-primary btn-lg">
+            ⬇ Download Full Report as PDF
+          </a>
         </div>
       </div>
     </div>
@@ -494,27 +522,27 @@ footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
       <div class="topic-card" onclick="openTopic('dsa')">
         <div class="topic-tag" style="color:#5b9cf6">Core CS</div>
         <div class="topic-title">Data Structures & Algorithms</div>
-        <div class="topic-count">150+ questions · All levels</div>
+        <div class="topic-count">12 questions · Easy to Hard</div>
       </div>
       <div class="topic-card" onclick="openTopic('dbms')">
         <div class="topic-tag" style="color:#7ecfb3">Database</div>
         <div class="topic-title">DBMS & SQL</div>
-        <div class="topic-count">80+ questions · Practical focus</div>
+        <div class="topic-count">8 questions · Practical focus</div>
       </div>
       <div class="topic-card" onclick="openTopic('os')">
         <div class="topic-tag" style="color:#f4a26b">Systems</div>
         <div class="topic-title">Operating Systems</div>
-        <div class="topic-count">60+ questions · Concept deep-dives</div>
+        <div class="topic-count">6 questions · Concept deep-dives</div>
       </div>
       <div class="topic-card" onclick="openTopic('oops')">
         <div class="topic-tag" style="color:#b09cf6">Programming</div>
         <div class="topic-title">OOP Concepts</div>
-        <div class="topic-count">50+ questions · With examples</div>
+        <div class="topic-count">6 questions · With examples</div>
       </div>
       <div class="topic-card" onclick="openTopic('hr')">
         <div class="topic-tag" style="color:#f46b6b">Soft Skills</div>
         <div class="topic-title">HR & Behavioral Questions</div>
-        <div class="topic-count">40+ questions · Answer templates</div>
+        <div class="topic-count">6 questions · Answer templates</div>
       </div>
       <div class="topic-card" onclick="openTopic('resume')">
         <div class="topic-tag" style="color:#5b9cf6">Resume</div>
@@ -712,6 +740,52 @@ const badgeClass = { impressive: 'badge-impressive', developing: 'badge-developi
         <span>${s.text}</span>
       </div>`;
   });
+  // ATS suggestions
+  if (data.ats_suggestions && data.ats_suggestions.length) {
+    const atsSection = document.getElementById('atsSection');
+    const atsList = document.getElementById('atsList');
+    atsSection.style.display = 'block';
+    atsList.innerHTML = '';
+    data.ats_suggestions.forEach(s => {
+      atsList.innerHTML += `
+        <div class="suggestion-item">
+          <div class="sug-icon" style="background:rgba(176,156,246,0.15);color:#b09cf6">🤖</div>
+          <span>${s}</span>
+        </div>`;
+    });
+  }
+  // Jobs
+  if (data.jobs && data.jobs.length) {
+    const jobsSection = document.getElementById('jobsSection');
+    const jobsList = document.getElementById('jobsList');
+    jobsSection.style.display = 'block';
+    jobsList.innerHTML = '';
+    data.jobs.forEach(job => {
+      jobsList.innerHTML += `
+        <div class="suggestion-item">
+          <div class="sug-icon" style="background:rgba(91,156,246,0.15);color:#5b9cf6">→</div>
+          <span>${job}</span>
+        </div>`;
+    });
+  }
+
+  // Personalized questions
+  if (data.interview_questions && data.interview_questions.length) {
+    const qSection = document.getElementById('questionsSection');
+    const qList = document.getElementById('questionsList');
+    qSection.style.display = 'block';
+    qList.innerHTML = '';
+    data.interview_questions.forEach((q, i) => {
+      qList.innerHTML += `
+        <div class="suggestion-item">
+          <div class="sug-icon" style="background:rgba(126,207,179,0.15);color:#7ecfb3;font-weight:700">Q${i+1}</div>
+          <span>${q}</span>
+        </div>`;
+    });
+  }
+
+  // Show download button
+  document.getElementById('downloadBtn').style.display = 'inline-flex';
 
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -726,8 +800,7 @@ function showToast(msg, type = '') {
 
 // ── Interview topic placeholder ────────────────────────────────
 function openTopic(topic) {
-  const names = { dsa:'Data Structures & Algorithms', dbms:'DBMS & SQL', os:'Operating Systems', oops:'OOP Concepts', hr:'HR Questions', resume:'Resume-Based Questions' };
-  showToast('Opening ' + names[topic] + ' — connect backend to load questions', 'success');
+  window.location.href = '/interview#' + topic;
 }
 </script>
 </body>

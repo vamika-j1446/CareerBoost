@@ -6,28 +6,53 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d0f14;--card:#242838;--border:rgba(255,255,255,0.08);--text:#e8eaf2;--muted:#8b90a8;--accent:#5b9cf6;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:40px 24px}
-.container{max-width:800px;margin:0 auto}
-.logo{font-family:var(--serif);font-size:24px;margin-bottom:40px}
-.logo span{color:var(--accent)}
-h1{font-family:var(--serif);font-size:36px;margin-bottom:8px}
-p{color:var(--muted);margin-bottom:32px}
-.actions{display:flex;gap:16px;flex-wrap:wrap}
-.btn{padding:14px 28px;border-radius:10px;font-family:var(--sans);font-weight:600;font-size:15px;cursor:pointer;border:none;text-decoration:none;display:inline-block}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+:root{--bg:#0d0f14;--card:#242838;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#e8eaf2;--muted:#8b90a8;--accent:#5b9cf6;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);backdrop-filter:blur(20px)}
+.logo{font-family:var(--serif);font-size:22px}.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500}
+.nav-links a:hover{color:var(--accent)}
+.container{max-width:900px;margin:0 auto;padding:60px 24px}
+h1{font-family:var(--serif);font-size:40px;margin-bottom:8px}
+p{color:var(--muted);margin-bottom:40px;font-size:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-decoration:none;color:var(--text);transition:all .2s;display:block}
+.card:hover{border-color:var(--border2);transform:translateY(-4px)}
+.card-icon{font-size:28px;margin-bottom:16px}
+.card-title{font-weight:600;font-size:16px;margin-bottom:6px}
+.card-desc{font-size:14px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="container">
+<nav>
   <div class="logo">Career<span>Boost</span></div>
-  <h1>Welcome back, {{ name }}! 👋</h1>
+  <ul class="nav-links">
+    <li><a href="/">Analyze</a></li>
+    <li><a href="/interview">Interview Prep</a></li>
+    <li><a href="/history">My Scores</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+</nav>
+<div class="container">
+  <h1>Welcome, {{ name }}! 👋</h1>
   <p>What would you like to do today?</p>
-  <div class="actions">
-    <a href="/" class="btn btn-primary">Analyze My Resume</a>
-    <a href="/logout" class="btn btn-outline">Logout</a>
+  <div class="cards">
+    <a href="/" class="card">
+      <div class="card-icon">📄</div>
+      <div class="card-title">Analyze Resume</div>
+      <div class="card-desc">Upload your resume and get an AI-powered score with suggestions.</div>
+    </a>
+    <a href="/interview" class="card">
+      <div class="card-icon">🎯</div>
+      <div class="card-title">Interview Prep</div>
+      <div class="card-desc">Practice DSA, DBMS, OS, OOP and HR questions topic by topic.</div>
+    </a>
+    <a href="/history" class="card">
+      <div class="card-icon">📈</div>
+      <div class="card-title">My Score History</div>
+      <div class="card-desc">See how your resume score has improved over time.</div>
+    </a>
   </div>
 </div>
 </body>

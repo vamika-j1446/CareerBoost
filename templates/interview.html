@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Interview Prep – CareerBoost</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0f14;--bg2:#161922;--card:#242838;--border:rgba(255,255,255,0.08);
+  --border2:rgba(255,255,255,0.14);--text:#e8eaf2;--muted:#8b90a8;
+  --accent:#5b9cf6;--accent2:#7ecfb3;--accent3:#f4a26b;--danger:#f46b6b;
+  --serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;--radius:16px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--serif);font-size:22px}.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.btn{padding:9px 20px;border-radius:50px;font-family:var(--sans);font-weight:500;font-size:14px;cursor:pointer;border:none;text-decoration:none;display:inline-block;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.container{max-width:1000px;margin:0 auto;padding:48px 24px}
+.page-title{font-family:var(--serif);font-size:42px;margin-bottom:8px}
+.page-sub{color:var(--muted);margin-bottom:40px}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
+.tab{padding:8px 20px;border-radius:50px;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted);transition:all .2s;font-family:var(--sans)}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.topic-section{display:none}.topic-section.active{display:block}
+.topic-header{margin-bottom:24px}
+.topic-header h2{font-family:var(--serif);font-size:28px;margin-bottom:6px}
+.topic-header p{color:var(--muted);font-size:15px}
+.q-list{display:flex;flex-direction:column;gap:12px}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.q-card:hover{border-color:var(--border2)}
+.q-header{padding:18px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.q-num{font-size:12px;color:var(--accent);font-weight:600;width:28px;flex-shrink:0}
+.q-text{font-size:15px;font-weight:500;flex:1}
+.q-arrow{color:var(--muted);font-size:18px;transition:transform .25s;flex-shrink:0}
+.q-card.open .q-arrow{transform:rotate(180deg)}
+.q-answer{display:none;padding:0 20px 18px 60px;color:var(--muted);font-size:14px;line-height:1.7;border-top:1px solid var(--border)}
+.q-answer{padding-top:14px}
+.q-card.open .q-answer{display:block}
+.difficulty{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:600;flex-shrink:0}
+.easy{background:rgba(126,207,179,0.15);color:#7ecfb3}
+.medium{background:rgba(244,162,107,0.15);color:#f4a26b}
+.hard{background:rgba(244,107,107,0.15);color:#f46b6b}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Career<span>Boost</span></div>
+  <ul class="nav-links">
+    <li><a href="/">Analyze</a></li>
+    <li><a href="/interview" class="active">Interview Prep</a></li>
+    <li><a href="/history">My Scores</a></li>
+    {% if session.user_name %}
+    <li><a href="/dashboard">{{ session.user_name }}</a></li>
+    <li><a href="/logout">Logout</a></li>
+    {% else %}
+    <li><a href="/login">Login</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="page-title">Interview Preparation</div>
+  <p class="page-sub">Topic-wise questions to help you ace your placement interviews.</p>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTopic('dsa',this)">DSA</button>
+    <button class="tab" onclick="showTopic('dbms',this)">DBMS & SQL</button>
+    <button class="tab" onclick="showTopic('os',this)">Operating Systems</button>
+    <button class="tab" onclick="showTopic('oops',this)">OOP</button>
+    <button class="tab" onclick="showTopic('hr',this)">HR Questions</button>
+  </div>
+
+  <!-- DSA -->
+  <div class="topic-section active" id="dsa">
+    <div class="topic-header">
+      <h2>Data Structures & Algorithms</h2>
+      <p>Core concepts tested in every technical interview</p>
+    </div>
+    <div class="q-list">
+      {% for q in questions.dsa %}
+      <div class="q-card">
+        <div class="q-header" onclick="toggleQ(this)">
+          <span class="q-num">Q{{loop.index}}</span>
+          <span class="q-text">{{q.q}}</span>
+          <span class="difficulty {{q.level}}">{{q.level}}</span>
+          <span class="q-arrow">▾</span>
+        </div>
+        <div class="q-answer">{{q.a}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- DBMS -->
+  <div class="topic-section" id="dbms">
+    <div class="topic-header">
+      <h2>DBMS & SQL</h2>
+      <p>Database concepts and query writing for technical rounds</p>
+    </div>
+    <div class="q-list">
+      {% for q in questions.dbms %}
+      <div class="q-card">
+        <div class="q-header" onclick="toggleQ(this)">
+          <span class="q-num">Q{{loop.index}}</span>
+          <span class="q-text">{{q.q}}</span>
+          <span class="difficulty {{q.level}}">{{q.level}}</span>
+          <span class="q-arrow">▾</span>
+        </div>
+        <div class="q-answer">{{q.a}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- OS -->
+  <div class="topic-section" id="os">
+    <div class="topic-header">
+      <h2>Operating Systems</h2>
+      <p>Process management, memory, scheduling and more</p>
+    </div>
+    <div class="q-list">
+      {% for q in questions.os %}
+      <div class="q-card">
+        <div class="q-header" onclick="toggleQ(this)">
+          <span class="q-num">Q{{loop.index}}</span>
+          <span class="q-text">{{q.q}}</span>
+          <span class="difficulty {{q.level}}">{{q.level}}</span>
+          <span class="q-arrow">▾</span>
+        </div>
+        <div class="q-answer">{{q.a}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- OOP -->
+  <div class="topic-section" id="oops">
+    <div class="topic-header">
+      <h2>OOP Concepts</h2>
+      <p>Object oriented programming principles with examples</p>
+    </div>
+    <div class="q-list">
+      {% for q in questions.oops %}
+      <div class="q-card">
+        <div class="q-header" onclick="toggleQ(this)">
+          <span class="q-num">Q{{loop.index}}</span>
+          <span class="q-text">{{q.q}}</span>
+          <span class="difficulty {{q.level}}">{{q.level}}</span>
+          <span class="q-arrow">▾</span>
+        </div>
+        <div class="q-answer">{{q.a}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- HR -->
+  <div class="topic-section" id="hr">
+    <div class="topic-header">
+      <h2>HR & Behavioral Questions</h2>
+      <p>Soft skills and behavioral questions for final rounds</p>
+    </div>
+    <div class="q-list">
+      {% for q in questions.hr %}
+      <div class="q-card">
+        <div class="q-header" onclick="toggleQ(this)">
+          <span class="q-num">Q{{loop.index}}</span>
+          <span class="q-text">{{q.q}}</span>
+          <span class="difficulty {{q.level}}">{{q.level}}</span>
+          <span class="q-arrow">▾</span>
+        </div>
+        <div class="q-answer">{{q.a}}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+function showTopic(id, btn) {
+  document.querySelectorAll('.topic-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Auto-open topic from URL hash
+window.addEventListener('load', () => {
+  const hash = window.location.hash.replace('#', '');
+  const validTopics = ['dsa', 'dbms', 'os', 'oops', 'hr'];
+  if (hash && validTopics.includes(hash)) {
+    const btn = document.querySelector(`.tab[onclick*="${hash}"]`);
+    if (btn) showTopic(hash, btn);
+  }
+});
+function toggleQ(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+}
+</script>
+</body>
+</html>

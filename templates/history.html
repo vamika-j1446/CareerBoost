@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Score History – CareerBoost</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0f14;--bg2:#161922;--card:#242838;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#e8eaf2;--muted:#8b90a8;--accent:#5b9cf6;--serif:'DM Serif Display',serif;--sans:'DM Sans',sans-serif;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);background:rgba(13,15,20,0.85);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--serif);font-size:22px}.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:24px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500}
+.nav-links a:hover,.nav-links a.active{color:var(--accent)}
+.container{max-width:900px;margin:0 auto;padding:48px 24px}
+.page-title{font-family:var(--serif);font-size:42px;margin-bottom:8px}
+.page-sub{color:var(--muted);margin-bottom:40px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:32px}
+.chart-card h3{font-family:var(--serif);font-size:22px;margin-bottom:24px}
+.history-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+.history-table th{padding:14px 20px;text-align:left;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border)}
+.history-table td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border)}
+.history-table tr:last-child td{border-bottom:none}
+.score-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:600;font-size:13px}
+.score-high{background:rgba(126,207,179,0.15);color:#7ecfb3}
+.score-mid{background:rgba(244,162,107,0.15);color:#f4a26b}
+.score-low{background:rgba(244,107,107,0.15);color:#f46b6b}
+.empty{text-align:center;padding:60px;color:var(--muted)}
+.empty a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Career<span>Boost</span></div>
+  <ul class="nav-links">
+    <li><a href="/">Analyze</a></li>
+    <li><a href="/interview">Interview Prep</a></li>
+    <li><a href="/history" class="active">My Scores</a></li>
+    {% if session.user_name %}
+    <li><a href="/dashboard">{{ session.user_name }}</a></li>
+    <li><a href="/logout">Logout</a></li>
+    {% else %}
+    <li><a href="/login">Login</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="page-title">My Score History</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px">
+    <p class="page-sub" style="margin-bottom:0">Track how your resume improves over time.</p>
+    {% if scores %}
+    <form method="POST" action="/clear-history" onsubmit="return confirm('Are you sure? This will delete all your score history.')">
+        <button type="submit" style="padding:9px 20px;border-radius:50px;background:rgba(244,107,107,0.15);color:#f46b6b;border:1px solid #f46b6b;font-family:var(--sans);font-size:14px;cursor:pointer">
+            🗑 Clear History
+        </button>
+    </form>
+    {% endif %}
+    </div>  
+    {% if scores %}
+  <div class="chart-card">
+    <h3>Overall Score Trend</h3>
+    <canvas id="scoreChart" height="100"></canvas>
+  </div>
+
+  <table class="history-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>File</th>
+        <th>Overall</th>
+        <th>Education</th>
+        <th>Skills</th>
+        <th>Projects</th>
+        <th>Experience</th>
+        <th>Certs</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in scores %}
+      <tr>
+        <td>{{loop.index}}</td>
+        <td>{{s.filename}}</td>
+        <td>
+          <span class="score-pill {% if s.overall_score >= 75 %}score-high{% elif s.overall_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+            {{s.overall_score}}
+          </span>
+        </td>
+        <td>{{s.education_score}}</td>
+        <td>{{s.skills_score}}</td>
+        <td>{{s.projects_score}}</td>
+        <td>{{s.experience_score}}</td>
+        <td>{{s.certifications_score}}</td>
+        <td>{{s.analyzed_at.strftime('%d %b %Y')}}</td>
+        <td>
+            <form method="POST" action="/delete-score/{{s.id}}" onsubmit="return confirm('Delete this entry?')">
+                <button type="submit" style="padding:5px 12px;border-radius:20px;background:rgba(244,107,107,0.12);color:#f46b6b;border:1px solid rgba(244,107,107,0.3);font-size:12px;cursor:pointer;font-family:var(--sans)">
+                    🗑 Delete
+                </button>
+            </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    const labels = [{% for s in scores %}"{{s.analyzed_at.strftime('%d %b')}}"{% if not loop.last %},{% endif %}{% endfor %}];
+    const data = [{% for s in scores %}{{s.overall_score}}{% if not loop.last %},{% endif %}{% endfor %}];
+    new Chart(document.getElementById('scoreChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Overall Score',
+          data,
+          borderColor: '#5b9cf6',
+          backgroundColor: 'rgba(91,156,246,0.1)',
+          borderWidth: 2,
+          pointBackgroundColor: '#5b9cf6',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b90a8' } },
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b90a8' } }
+        }
+      }
+    });
+  </script>
+  {% else %}
+  <div class="empty">
+    <p>No scores yet. <a href="/">Upload your resume</a> to get started.</p>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>
